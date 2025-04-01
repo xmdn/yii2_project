@@ -1,0 +1,38 @@
+version: '2'
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - /d/yii2_project/:/app
+    ports:
+      - '8054:80'
+    depends_on:
+      - mongo
+    networks:
+      - yii2net
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    restart: always
+    command:
+      - --storageEngine
+      - wiredTiger
+      - --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: rootdb
+      MONGO_INITDB_ROOT_PASSWORD: toor022
+      MONGO_INITDB_DATABASE: yii2db
+    volumes:
+      - /d/yii2_project/docker/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+    # volumes:
+    #   - ./data/mongodb:/data/db
+    networks:
+      - yii2net
+  
+networks:
+  yii2net:
+    driver: bridge
