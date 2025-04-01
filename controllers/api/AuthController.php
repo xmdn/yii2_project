@@ -33,8 +33,6 @@ class AuthController extends Controller
             }
 
             $payload = [
-                'iss' => 'http://localhost:8054',
-                'aud' => 'http://localhost:8054',
                 'iat' => time(),
                 'exp' => time() + 3600,
                 'uid' => $user->id,
