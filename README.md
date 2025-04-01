@@ -208,18 +208,18 @@ Body:
 
 ### List Users
 ```
-GET /users?page=1&per-page=10&query=John
+GET api/users?page=1&per-page=10&query=John
 ```
 
 #### Supports: pagination, search, and sorting by first_name, last_name, email
 
 ### Get Single User
 
-GET /users/{id}
+GET api/users/{id}
 
 ### Update User
 ```
-PUT /users/{id}
+PUT api/users/{id}
 ```
 Body (partial or full):
 ```json
@@ -229,7 +229,7 @@ Body (partial or full):
 ```
 ### Delete User
 ```
-DELETE /users/{id}
+DELETE api/users/{id}
 ```
 Deletes the user and all associated tasks
 
@@ -237,11 +237,11 @@ Deletes the user and all associated tasks
 
 ### Register
 ```
-POST /users
+POST api/users
 ```
 ### Login
 ```
-POST /users/login
+POST api/users/login
 ```
 
 Body:
@@ -257,7 +257,7 @@ Response includes a JWT token
 
 ### Create Task
 ```
-POST /users/{id}/tasks
+POST api/users/{id}/tasks
 ```
 
 Body:
@@ -269,31 +269,31 @@ Body:
 ```
 ### List Tasks
 ```
-GET /users/{id}/tasks?page=1&per-page=5&query=In Progress
+GET api/users/{id}/tasks?page=1&per-page=5&query=In Progress
 ```
 Supports: pagination, search, and sorting by title, status
 
 ### View Task
 ```
-GET /users/{id}/tasks/{taskId}
+GET api/users/{id}/tasks/{taskId}
 ```
 ### Update Task
 ```
-PUT /users/{id}/tasks/{taskId}
+PUT api/users/{id}/tasks/{taskId}
 ```
 ### Delete Task (if status is "New")
 ```
-DELETE /users/{id}/tasks/{taskId}
+DELETE api/users/{id}/tasks/{taskId}
 ```
 ### Delete All "New" Tasks
 ```
-DELETE /users/{id}/tasks
+DELETE api/users/{id}/tasks
 ```
 ### Task Statistics
 
 Per User Stats
 ```
-GET /users/{id}/tasks/stats
+GET api/users/{id}/tasks/stats
 ```
 Response:
 ```json
@@ -305,7 +305,7 @@ Response:
 ```
 ### Global Stats
 ```
-GET /users/{id}/stats-global
+GET api/users/{id}/stats-global
 ```
 Aggregated stats across all users
 
