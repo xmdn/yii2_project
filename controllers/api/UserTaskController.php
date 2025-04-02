@@ -25,25 +25,18 @@ class UserTaskController extends BaseApiController
 
         // return $actions;
         return [
-            'index' => [
-                'class' => 'yii\rest\IndexAction',
-                'modelClass' => $this->modelClass,
-            ],
+            // 'index' => [
+            //     'class' => 'yii\rest\IndexAction',
+            //     'modelClass' => $this->modelClass,
+            // ],
         ];
     }
 
     public function actionIndex($id)
     {
-        $tasks = Task::getForUserAll($id);
+        $query = Task::getForUserAll($id);
 
-        return array_map(function ($task) {
-            return [
-                'id' => $task->id,
-                'title' => $task->title,
-                'status' => $task->status,
-                'created_at' => date('d-m-Y H:i', strtotime($task->created_at)),
-            ];
-        }, $tasks);
+        return $this->createPaginatedProvider($query, ['id', 'created_at', 'title']);
     }
 
     public function actionCreate($id)
@@ -76,10 +69,6 @@ class UserTaskController extends BaseApiController
 
     public function actionDelete($id, $taskId)
     {
-        // $user = User::findOne(['id' => (int)$id]);
-        // if (!$user) {
-        //     throw new NotFoundHttpException('User not found');
-        // }
 
         $task = Task::getForUser($id, $taskId, ['status' => Task::STATUS_NEW]);
         // if (!$task) throw new NotFoundHttpException('Unprocessed task not found');

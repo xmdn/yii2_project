@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\mongodb\ActiveRecord;
+use yii\mongodb\ActiveQuery;
 use yii\web\NotFoundHttpException;
 use app\models\User;
 use app\components\TaskNotFoundException;
@@ -92,13 +93,11 @@ class Task extends ActiveRecord
         return $task;
     }
 
-    public static function getForUserAll($userId): self
+    public static function getForUserAll($userId): ActiveQuery
     {
-        $tasks = static::find()->where(['user_id' => User::validateId((int)$userId)])->all();
+        $tasks = static::find()->where(['user_id' => User::validateId((int)$userId)]);
 
         if (!$tasks) {
-            throw new TaskNotFoundException();
-        } elseif (empty($tasks)) {
             throw new TaskNotFoundException('No tasks found for this user.');
         }
 
