@@ -13,14 +13,26 @@ class Task extends ActiveRecord
 {
     const STATUS_NEW = 'New';
     const STATUS_IN_PROGRESS = 'In Progress';
-    const STATUS_DONE = 'Done';
+    const STATUS_FINISHED = 'Finished';
+    const STATUS_FAILED = 'Failed';
+
+    public static function allowedStatusTransitions(): array
+    {
+        return [
+            self::STATUS_NEW => [self::STATUS_IN_PROGRESS],
+            self::STATUS_IN_PROGRESS => [self::STATUS_FINISHED, self::STATUS_FAILED],
+            self::STATUS_FINISHED => [],
+            self::STATUS_FAILED => [],
+        ];
+    }
 
     public static function getStatuses()
     {
         return [
             self::STATUS_NEW,
             self::STATUS_IN_PROGRESS,
-            self::STATUS_DONE,
+            self::STATUS_FINISHED,
+            self::STATUS_FAILED,
         ];
     }
 
@@ -111,6 +123,15 @@ class Task extends ActiveRecord
             $raw = Yii::$app->request->getBodyParams();
             if (!array_key_exists('status', $raw)) {
                 $this->status = self::STATUS_NEW;
+            }
+        } elseif (!$this->isNewRecord && $this->isAttributeChanged('status')) {
+            $oldStatus = $this->getOldAttribute('status');
+            $newStatus = $this->status;
+
+            $allowed = self::allowedStatusTransitions()[$oldStatus] ?? [];
+
+            if (!in_array($newStatus, $allowed)) {
+                $this->addError('status', "Invalid status transition from '$oldStatus' to '$newStatus'.");
             }
         }
 
