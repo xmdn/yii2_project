@@ -32,12 +32,12 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     }
 
 
-    // public function fields()
-    // {
-    //     $fields = parent::fields();
-    //     unset($fields['password'], $fields['_id'], $fields['id']); // optional
-    //     return $fields;
-    // }
+    public function fields()
+    {
+        $fields = parent::fields();
+        unset($fields['password'], $fields['_id'], $fields['id']); // optional
+        return $fields;
+    }
 
     public function rules()
     {
