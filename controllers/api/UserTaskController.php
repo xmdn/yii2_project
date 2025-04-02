@@ -17,14 +17,24 @@ class UserTaskController extends BaseApiController
 
     public $modelClass = 'app\models\Task';
 
+    public function actions()
+    {
+        // $actions = parent::actions();
+
+        // unset($actions['create'], $actions['update']);
+
+        // return $actions;
+        return [
+            'index' => [
+                'class' => 'yii\rest\IndexAction',
+                'modelClass' => $this->modelClass,
+            ],
+        ];
+    }
+
     public function actionIndex($id)
     {
-        $user = User::findOne(['id' => (int)$id]);
-        if (!$user) {
-            throw new NotFoundHttpException('User not found');
-        }
-
-        $tasks = Task::find()->where(['user_id' => $user->id])->all();
+        $tasks = Task::getForUserAll($id);
 
         return array_map(function ($task) {
             return [
@@ -38,16 +48,7 @@ class UserTaskController extends BaseApiController
 
     public function actionCreate($id)
     {
-        $user = User::findOne(['id' => (int)$id]);
-        if (!$user) {
-            throw new NotFoundHttpException('User not found');
-        }
-
-        $task = new Task();
-        $task->load(\Yii::$app->request->getBodyParams(), '');
-        $task->user_id = (int) $user->id;
-        $task->status = 'New';
-        $task->created_at = date('d-m-Y H:i');
+        $task = Task::createForUser($id, Yii::$app->request->getBodyParams());
 
         if ($task->save()) {
             return $task;
@@ -58,23 +59,12 @@ class UserTaskController extends BaseApiController
 
     public function actionView($id, $taskId)
     {
-        $user = User::findOne(['id' => (int)$id]);
-        if (!$user) {
-            throw new NotFoundHttpException('User not found');
-        }
-
-        return Task::findOne(['user_id' => (int) $user->id, 'id' => (int) $taskId]);
+        return Task::getForUser($id, $taskId);
     }
 
     public function actionUpdate($id, $taskId)
     {
-        $user = User::findOne(['id' => (int)$id]);
-        if (!$user) {
-            throw new NotFoundHttpException('User not found');
-        }
-
-        $task = Task::findOne(['user_id' => (int) $user->id, 'id' => (int) $taskId]);
-        if (!$task) throw new NotFoundHttpException('Task not found');
+        $task = Task::getForUser($id, $taskId);
 
         $task->load(\Yii::$app->request->getBodyParams(), '');
         if ($task->save()) {
@@ -86,13 +76,13 @@ class UserTaskController extends BaseApiController
 
     public function actionDelete($id, $taskId)
     {
-        $user = User::findOne(['id' => (int)$id]);
-        if (!$user) {
-            throw new NotFoundHttpException('User not found');
-        }
+        // $user = User::findOne(['id' => (int)$id]);
+        // if (!$user) {
+        //     throw new NotFoundHttpException('User not found');
+        // }
 
-        $task = Task::findOne(['user_id' => (int) $user->id, 'id' => (int) $taskId, 'status' => 'New']);
-        if (!$task) throw new NotFoundHttpException('Unprocessed task not found');
+        $task = Task::getForUser($id, $taskId, ['status' => Task::STATUS_NEW]);
+        // if (!$task) throw new NotFoundHttpException('Unprocessed task not found');
 
         return $task->delete();
     }

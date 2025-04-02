@@ -4,6 +4,9 @@ namespace app\models;
 
 use Yii;
 use yii\mongodb\ActiveRecord;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use yii\web\NotFoundHttpException;
 
 class User extends ActiveRecord implements \yii\web\IdentityInterface
 {
@@ -40,9 +43,17 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     {
         return [
             [['username', 'password', 'first_name', 'last_name', 'email'], 'required'],
-            ['username', 'string', 'min' => 4],
-            ['password', 'match', 'pattern' => '/^(?=.*[A-Za-z])(?=.*\d)(?=.*[_\-\.,]).{6,}$/'],
-            [['first_name', 'last_name'], 'match', 'pattern' => '/^[A-Z][a-z]*$/'],
+            ['username', 'string', 'min' => 4, 
+                'message' => '{attribute} must have at least 4 chars length.',
+            ],
+            ['password', 'match', 
+                'pattern' => '/^(?=.*[A-Za-z])(?=.*\d)(?=.*[_\-\.,]).{6,}$/',
+                'message' => 'Password must be at least 6 characters long and contain at least one letter, one digit, and one special character (_ - . ,)',
+            ],
+            [['first_name', 'last_name'], 'match', 
+                'pattern' => '/^[A-Z][a-z]*$/',
+                'message' => '{attribute} must start with a capital letter and contain only lowercase letters afterward.',
+            ],
             ['email', 'email'],
             [['username', 'password', 'first_name', 'last_name', 'email'], 'safe'],
         ];
@@ -52,7 +63,16 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
 
     public static function findIdentity($id)
     {
-        return static::findOne(['id' => (int)$id]);
+        $user = static::findOne(['id' => (int)$id]);
+        if (!$user) {
+            throw new NotFoundHttpException('User not found');
+        }
+        return $user;
+    }
+
+    public static function validateId($id)
+    {
+        return static::findIdentity($id)->id;
     }
 
     public static function querySearch($query, $search)
@@ -67,9 +87,8 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
 
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        // Decode JWT
         try {
-            $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key(Yii::$app->params['jwtSecretKey'], 'HS256'));
+            $decoded = JWT::decode($token, new Key(Yii::$app->params['jwtSecretKey'], 'HS256'));
             return static::findOne(['id' => $decoded->uid]);
         } catch (\Exception $e) {
             return null;
@@ -99,8 +118,8 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     public function validatePassword($password)
     {
         return Yii::$app->security->validatePassword($password, $this->password);
-        // return Yii::$app->security->validatePassword($password, $this->password_hash);
     }
+
 
     /**
      * Override beforeSave to auto-increment `id` on insert

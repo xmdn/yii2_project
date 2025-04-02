@@ -53,7 +53,7 @@ class UsersController extends BaseApiController
         $user = $this->ifRowExist($user, $data);
 
         if ($user->save()) {
-            return ['message' => 'User and related tasks deleted successfully.', 'user' => $user];
+            return ['message' => 'User updated successfully.', 'user' => $user];
         }
 
         return ['error' => $user->getErrors()];
